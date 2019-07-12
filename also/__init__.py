@@ -1,63 +1,74 @@
-import functools
+from functools import partial
+
+import numpy as np
+
+from sklearn.model_selection import KFold
 
 from . import utils
 
-import numpy as np
-from sklearn.model_selection import KFold
 
-
-class ALSO:
-    """ Insert slick comment
+def fit(reg, X, n_folds=5):
     """
 
-    def __init__(self, reg, n_folds=5):
-        self.reg = reg
-        self.n_folds = n_folds
+    """
+    w_sum = 0
+    w_scores_list = []
 
-    def fit(self, X):
-        w_sum = 0
-        w_scores_list = []
+    n = X.shape[1]
 
-        n = X.shape[1]
-        for i in range(n):
-            x, y = partition_mat(X, i)
+    for i in range(n):
+        x, y = utils.partition_mat(X, i)
 
-            scores, err = self._fit_attr(x, y)
-            w, w_scores = _weight_scores(y, scores, err)
-            w_sum += w
+        scores, err = _fit_attr(x, y, reg, n_folds)
+        w, w_scores = utils.weight_scores(y, scores, err)
+        w_sum += w
 
-            w_scores_list.append(w_scores)
+        w_scores_list.append(w_scores)
 
-        x = np.column_stack(w_scores_list)
+    w_scores_mat = np.column_stack(w_scores_list)
 
-        _score_inst = functools.partial(_score_instance, w_sum=w_sum)
-        return np.apply_along_axis(_score_inst, 1, w_scores_mat)
+    _score_inst = partial(utils.score_instance, w_sum=w_sum)
+    return np.apply_along_axis(
+        func1d=_score_inst,
+        axis=1,
+        arr=w_scores_mat
+    )
 
-    def _fit_attr(self, X, y):
-        """ Return vector of scores and error scalar
-        """
-        all_scores = None
-        error = 0
 
-        kf = KFold(n_splits=self.n_folds)
+def _fit_attr(X, y, reg, n_folds=5):
+    all_scores = None
+    error = 0
 
-        for train_index, test_index in kf.split(X):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
+    kf = KFold(n_splits=n_folds)
 
-            m = self.reg.fit(X_train, y_train)
+    for train_idx, test_idx in kf.split(X):
+        X_train, y_train = X[train_idx], y[train_idx]
 
-            for tidx in test_index:
+        model = reg.fit(X_train, y_train)
 
-                pred = m.predict(X[tidx])
-                scores = (y[tidx] - pred) ** 2
+        for tidx in test_idx:
+            pred = model.predict(X[tidx])
+            scores = (y[tidx] - pred) ** 2
 
-                error = error + scores.item()
+            error = error + scores.item()
 
-                all_scores = (
-                    scores
-                    if all_scores is None
-                    else np.concatenate((all_scores, scores), axis=0)
-                )
+            all_scores = (
+                scores
+                if all_scores is None
+                else np.concatenate((all_scores, scores), axis=0)
+            )
 
-        return all_scores, error
+    return all_scores, error
+
+
+def _predicate_instance(model, x, y):
+    """
+    """
+    pred = model.predict(x)
+    score = (y - pred) ** 2
+    return score
+
+
+    
+
+

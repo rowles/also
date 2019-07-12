@@ -8,7 +8,7 @@ def partition_mat(X, n):
     return x, y
 
 
-def _weight_scores(y, scores, err):
+def weight_scores(y, scores, err):
     sq_dev = (y - np.mean(y)) ** 2
     rk = np.sqrt(err / np.sum(sq_dev))
     w = 1 - min(1, rk)
@@ -16,5 +16,5 @@ def _weight_scores(y, scores, err):
     return w, w_scores
 
 
-def _score_instance(weights, w_sum):
+def score_instance(weights, w_sum):
     return np.sqrt(np.sum(weights) / w_sum)

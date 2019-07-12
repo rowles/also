@@ -1,10 +1,24 @@
 SHELL := /usr/bin/env bash
 
+define USAGE
+Targets
+---------------
+
+  clean
+  setup_venv
+  format
+  lint
+  utest
+  notebook
+
+endef
+export USAGE
+
 all:
-	echo "blah"
+	@echo "$$USAGE"
 
 clean:
-	rm -rf ./venv ./also/*.pyc
+	rm -rf ./venv ./also/*.pyc ./also.egg-info
 
 setup_venv: clean
 	python3 -m venv ./venv
@@ -15,7 +29,7 @@ setup_venv: clean
 
 format:
 	source ./venv/bin/activate \
-		&& black ./also/ ./setup.py
+		&& black ./also/ ./setup.py ./tests/
 
 lint:
 	source ./venv/bin/activate \
@@ -24,4 +38,8 @@ utest:
 	source ./venv/bin/activate \
 		&& py.test --cov=also ./tests/
 
+notebook:
+	source ./venv/bin/activate \
+		&& pip3 install matplotlib \
+		&& jupyter notebook --NotebookApp.token='' --NotebookApp.password=''
 
