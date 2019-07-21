@@ -4,7 +4,7 @@ import numpy as np
 
 from sklearn.model_selection import KFold
 
-from . import utils
+from also import utils
 
 
 def fit(reg, X, n_folds=5):
@@ -47,7 +47,7 @@ def _fit_attr(X, y, reg, n_folds=5):
         model = reg.fit(X_train, y_train)
 
         for tidx in test_idx:
-            pred = model.predict(X[tidx])
+            pred = model.predict(np.array([X[tidx]]))
             scores = (y[tidx] - pred) ** 2
 
             error = error + scores.item()
