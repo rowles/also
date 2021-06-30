@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name="also",
-    version="0.1",
+    version="0.2",
     description="Attribute-wise Learning for Scoring Outliers",
     author="Andrew Rowles",
     author_email="andrew@rowles.io",

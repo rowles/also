@@ -36,7 +36,7 @@ lint:
 		&& pylint ./also/
 utest:
 	source ./venv/bin/activate \
-		&& py.test --cov=also ./tests/
+		&& py.test ./tests/
 
 notebook:
 	source ./venv/bin/activate \
